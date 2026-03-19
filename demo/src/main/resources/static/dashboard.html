@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VBS – Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+          --pink:    #FF40A0;
+          --magenta: #8040F0;
+          --deep:    #5010C0;
+          --light:   #f0e8ff;
+          --card-bg:#fff;
+          --text:    #0a0020;
+          --muted:   #A060D0;
+          --green:  #3ecf8e;
+          --red:    #f5576c;
+          --blue:   #4facfe;
+          --radius: 16px;
+          --shadow: 0 8px 32px rgba(128,64,240,.15);
+        }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        body {
+          font-family: 'DM Sans', sans-serif;
+          background: linear-gradient(135deg, #f0e8ff 0%, #e8e0ff 100%);
+          min-height: 100vh; padding: 20px; color: var(--text);
+        }
+        .header {
+          background: linear-gradient(135deg, var(--pink) 0%, var(--magenta) 100%);
+          border-radius: var(--radius); padding: 22px 28px;
+          display: flex; justify-content: space-between; align-items: center;
+          color: #fff; box-shadow: var(--shadow); margin-bottom: 22px;
+          animation: slideDown .5s ease;
+        }
+        .brand { display:flex; align-items:center; gap:12px; }
+        .brand-logo {
+          width:44px; height:44px; background:rgba(255,255,255,.2);
+          border-radius:12px; display:flex; align-items:center; justify-content:center;
+          font-family:'Playfair Display',serif; font-size:16px; font-weight:700; color:#fff;
+        }
+        .brand h1 { font-family:'Playfair Display',serif; font-size:22px; }
+        .brand p  { font-size:12px; opacity:.85; margin-top:2px; }
+        .header-actions { display:flex; gap:10px; }
+        .btn-ghost {
+          padding:9px 18px; background:rgba(255,255,255,.18); color:#fff;
+          border:1.5px solid rgba(255,255,255,.5); border-radius:10px;
+          cursor:pointer; font-weight:600; font-size:13px; transition:.25s; font-family:inherit;
+        }
+        .btn-ghost:hover { background:#fff; color:var(--magenta); }
+        .main { max-width:860px; margin:0 auto; }
+        .welcome-row {
+          display:flex; justify-content:space-between; align-items:center;
+          margin-bottom:20px; animation: fadeUp .5s .1s both;
+        }
+        .welcome-row h2 { font-family:'Playfair Display',serif; font-size:26px; color:var(--magenta); }
+        .user-badge {
+          background:var(--card-bg); border-radius:30px; padding:6px 14px 6px 8px;
+          display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted);
+          box-shadow:0 2px 10px rgba(0,0,0,.06);
+        }
+        .user-badge span { font-weight:600; color:var(--text); }
+        .avatar {
+          width:30px; height:30px; border-radius:50%;
+          background:linear-gradient(135deg,var(--pink),var(--magenta));
+          display:flex; align-items:center; justify-content:center;
+          color:#fff; font-size:13px; font-weight:700;
+        }
+        .balance-card {
+          background: linear-gradient(135deg, var(--magenta) 0%, var(--deep) 100%);
+          border-radius: var(--radius); padding: 30px; color: #fff;
+          position: relative; overflow: hidden; margin-bottom: 20px;
+          box-shadow: 0 12px 40px rgba(128,64,240,.35); animation: fadeUp .5s .15s both;
+        }
+        .balance-card::before {
+          content:''; position:absolute; top:-60px; right:-60px;
+          width:220px; height:220px; background:rgba(255,255,255,.07); border-radius:50%;
+        }
+        .balance-card::after {
+          content:''; position:absolute; bottom:-40px; left:40px;
+          width:160px; height:160px; background:rgba(255,255,255,.05); border-radius:50%;
+        }
+        .balance-label { font-size:13px; opacity:.8; margin-bottom:8px; letter-spacing:.5px; text-transform:uppercase; }
+        .balance-amount {
+          font-family:'Playfair Display',serif; font-size:42px; font-weight:700;
+          letter-spacing:-1px; display:flex; align-items:baseline; gap:6px;
+        }
+        .balance-amount .currency { font-size:22px; opacity:.8; }
+        .balance-meta { margin-top:14px; font-size:12px; opacity:.7; }
+        .qr-trigger {
+          position:absolute; top:22px; right:22px;
+          background:rgba(255,255,255,.2); border:1.5px solid rgba(255,255,255,.4);
+          color:#fff; border-radius:10px; padding:8px 16px;
+          cursor:pointer; font-size:12px; font-weight:600; font-family:inherit; transition:.25s;
+        }
+        .qr-trigger:hover { background:rgba(255,255,255,.35); }
+        .actions-grid {
+          display: grid; grid-template-columns: repeat(4,1fr);
+          gap: 14px; margin-bottom: 20px; animation: fadeUp .5s .2s both;
+        }
+        .action-card {
+          background: var(--card-bg); border-radius: var(--radius);
+          padding: 22px 14px; text-align: center; cursor: pointer;
+          border: 2px solid transparent; box-shadow: 0 4px 16px rgba(0,0,0,.06);
+          transition: transform .25s, box-shadow .25s, border-color .25s;
+          display: flex; flex-direction:column; align-items:center; gap:12px;
+        }
+        .action-card:hover { transform:translateY(-5px); box-shadow:0 12px 32px rgba(128,64,240,.2); border-color:var(--pink); }
+        .action-card:active { transform:scale(.97); }
+        .action-icon {
+          width:48px; height:48px; border-radius:14px;
+          display:flex; align-items:center; justify-content:center;
+        }
+        .action-icon svg { width:24px; height:24px; }
+        .icon-withdraw { background:#fde0e5; }
+        .icon-deposit  { background:#d4f8e8; }
+        .icon-transfer { background:#d4e7ff; }
+        .icon-passbook { background:#f0e8ff; }
+        .action-card span { font-size:13px; font-weight:600; color:var(--text); }
+        .message {
+          padding:12px 16px; border-radius:10px; font-size:14px;
+          margin-bottom:16px; display:none;
+        }
+        .message.show { display:block; }
+        .message.success { background:#d4f8e8; color:#1a7a4a; border:1px solid #b2efd4; }
+        .message.error   { background:#fde0e5; color:#9b1c2e; border:1px solid #f9bbc5; }
+        .stats-row {
+          display:grid; grid-template-columns:repeat(3,1fr);
+          gap:14px; margin-bottom:20px; animation:fadeUp .5s .25s both;
+        }
+        .stat-card {
+          background:var(--card-bg); border-radius:var(--radius);
+          padding:18px 20px; box-shadow:0 4px 16px rgba(0,0,0,.06); border-left:4px solid var(--pink);
+        }
+        .stat-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+        .stat-val   { font-size:20px; font-weight:700; color:var(--magenta); font-family:'Playfair Display',serif; }
+        .transactions-section {
+          background:var(--card-bg); border-radius:var(--radius);
+          padding:24px; box-shadow:0 4px 16px rgba(0,0,0,.06); animation:fadeUp .5s .3s both;
+        }
+        .section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+        .section-header h3 { font-family:'Playfair Display',serif; font-size:18px; color:var(--text); }
+        .view-all-btn {
+          font-size:13px; color:var(--magenta); cursor:pointer; font-weight:600;
+          background:none; border:none; font-family:inherit; padding:6px 12px; border-radius:8px; transition:.2s;
+        }
+        .view-all-btn:hover { background:var(--light); }
+        .tx-item {
+          display:flex; justify-content:space-between; align-items:center;
+          padding:14px 0; border-bottom:1px solid #f0e8ff;
+        }
+        .tx-item:last-child { border-bottom:none; }
+        .tx-left { display:flex; align-items:center; gap:12px; }
+        .tx-icon { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; }
+        .tx-icon svg { width:18px; height:18px; }
+        .tx-desc { font-size:14px; font-weight:500; color:var(--text); }
+        .tx-date { font-size:11px; color:var(--muted); margin-top:2px; }
+        .tx-amount { font-size:15px; font-weight:700; }
+        .tx-amount.credit { color:var(--green); }
+        .tx-amount.debit  { color:var(--red); }
+        .empty-tx { text-align:center; color:var(--muted); padding:30px; font-size:14px; }
+        .modal {
+          display:none; position:fixed; inset:0; z-index:1000;
+          background:rgba(42,18,40,.5); backdrop-filter:blur(4px);
+          align-items:center; justify-content:center; padding:20px;
+        }
+        .modal.show { display:flex; }
+        .modal-box {
+          background:#fff; border-radius:20px; padding:30px; width:100%; max-width:420px;
+          box-shadow:0 24px 60px rgba(0,0,0,.25); animation:popIn .3s cubic-bezier(.34,1.56,.64,1);
+        }
+        .modal-title { font-family:'Playfair Display',serif; font-size:20px; color:var(--text); margin-bottom:22px; }
+        .form-group { margin-bottom:18px; }
+        .form-group label { display:block; font-size:13px; font-weight:600; color:var(--text); margin-bottom:7px; }
+        .form-group input, .form-group select {
+          width:100%; padding:12px 15px; border:2px solid #ddd0ff; border-radius:10px;
+          font-size:14px; font-family:inherit; transition:.2s; background:#f0e8ff; color:var(--text);
+        }
+        .form-group input:focus, .form-group select:focus {
+          outline:none; border-color:var(--magenta); background:#fff; box-shadow:0 0 0 3px rgba(128,64,240,.1);
+        }
+        .modal-btns { display:flex; gap:10px; justify-content:flex-end; margin-top:4px; }
+        .btn-submit {
+          padding:11px 24px; background:linear-gradient(135deg,var(--pink),var(--magenta));
+          color:#fff; border:none; border-radius:10px; font-weight:700;
+          cursor:pointer; font-family:inherit; font-size:14px; transition:.25s;
+        }
+        .btn-submit:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(128,64,240,.35); }
+        .btn-cancel {
+          padding:11px 20px; background:#f0e8ff; color:var(--magenta);
+          border:none; border-radius:10px; font-weight:600;
+          cursor:pointer; font-family:inherit; font-size:14px; transition:.2s;
+        }
+        .btn-cancel:hover { background:#ddd0ff; }
+        .qr-modal-box {
+          background:#fff; border-radius:20px; padding:34px; width:100%; max-width:340px;
+          text-align:center; box-shadow:0 24px 60px rgba(0,0,0,.25);
+          animation:popIn .3s cubic-bezier(.34,1.56,.64,1);
+        }
+        .qr-modal-box h3 { font-family:'Playfair Display',serif; font-size:20px; color:var(--magenta); margin-bottom:6px; }
+        .qr-modal-box p  { font-size:13px; color:var(--muted); margin-bottom:22px; }
+        #qrCanvas { border-radius:12px; box-shadow:0 4px 20px rgba(128,64,240,.15); margin-bottom:18px; }
+        .qr-user-info { background:var(--light); border-radius:12px; padding:14px; margin-bottom:18px; }
+        .qr-user-info .qr-name { font-weight:700; font-size:15px; color:var(--text); }
+        .qr-user-info .qr-id   { font-size:12px; color:var(--muted); margin-top:4px; }
+        .btn-download {
+          width:100%; padding:12px; background:linear-gradient(135deg,var(--pink),var(--magenta));
+          color:#fff; border:none; border-radius:10px; font-weight:700;
+          cursor:pointer; font-family:inherit; font-size:14px; margin-bottom:10px; transition:.25s;
+        }
+        .btn-download:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(128,64,240,.35); }
+        @keyframes slideDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:none} }
+        @keyframes fadeUp    { from{opacity:0;transform:translateY(18px)}  to{opacity:1;transform:none} }
+        @keyframes popIn     { from{opacity:0;transform:scale(.88)}        to{opacity:1;transform:scale(1)} }
+        @media(max-width:620px){
+          .actions-grid { grid-template-columns:repeat(2,1fr); }
+          .stats-row    { grid-template-columns:1fr 1fr; }
+          .stats-row .stat-card:last-child { grid-column:1/-1; }
+          .balance-amount { font-size:32px; }
+          .welcome-row h2 { font-size:20px; }
+          .header { padding:16px 18px; }
+          .qr-trigger { top:14px; right:14px; padding:7px 12px; }
+        }
+        @media(max-width:400px){ body{padding:12px;} .actions-grid{gap:10px;} }
+    </style>
+</head>
+<body>
+<div class="main">
+
+    <div class="header">
+        <div class="brand">
+            <div class="brand-logo">VB</div>
+            <div><h1>VBS</h1><p>Virtual Banking System</p></div>
+        </div>
+        <div class="header-actions">
+            <button class="btn-ghost" onclick="goPassbook()">Passbook</button>
+            <button class="btn-ghost" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="welcome-row">
+        <h2 id="welcomeText">Welcome back!</h2>
+        <div class="user-badge">
+            <div class="avatar" id="avatarInitial">U</div>
+            ID: <span id="userId">-</span>
+        </div>
+    </div>
+
+    <div id="dashMessage" class="message"></div>
+
+    <div class="balance-card">
+        <button class="qr-trigger" onclick="openQrModal()">My QR</button>
+        <div class="balance-label">Available Balance</div>
+        <div class="balance-amount">
+            <span class="currency">Rs.</span>
+            <span id="balance">0.00</span>
+        </div>
+        <div class="balance-meta">Last updated just now &middot; Account active</div>
+    </div>
+
+    <div class="actions-grid">
+        <div class="action-card" onclick="openModal('withdraw')">
+            <div class="action-icon icon-withdraw">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#f5576c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            </div>
+            <span>Withdraw</span>
+        </div>
+        <div class="action-card" onclick="openModal('deposit')">
+            <div class="action-icon icon-deposit">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#3ecf8e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+            </div>
+            <span>Deposit</span>
+        </div>
+        <div class="action-card" onclick="openModal('transfer')">
+            <div class="action-icon icon-transfer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#4facfe" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M15 6l6 6-6 6"/></svg>
+            </div>
+            <span>Transfer</span>
+        </div>
+        <div class="action-card" onclick="goPassbook()">
+            <div class="action-icon icon-passbook">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#8040F0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
+            </div>
+            <span>Passbook</span>
+        </div>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">Total Transactions</div><div class="stat-val" id="statCount">-</div></div>
+        <div class="stat-card"><div class="stat-label">Total In</div><div class="stat-val" id="statIn">Rs. 0</div></div>
+        <div class="stat-card"><div class="stat-label">Total Out</div><div class="stat-val" id="statOut">Rs. 0</div></div>
+    </div>
+
+    <div class="transactions-section">
+        <div class="section-header">
+            <h3>Recent Activity</h3>
+            <button class="view-all-btn" onclick="goPassbook()">View All</button>
+        </div>
+        <div id="recentList"><p class="empty-tx">Loading...</p></div>
+    </div>
+
+</div>
+
+<!-- WITHDRAW MODAL -->
+<div id="withdrawModal" class="modal">
+    <div class="modal-box">
+        <div class="modal-title">Withdraw Funds</div>
+        <div class="form-group"><label>Amount (Rs.)</label><input type="number" id="withdrawAmount" min="1" step="0.01" placeholder="Enter amount"></div>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeModal('withdraw')">Cancel</button>
+            <button class="btn-submit" onclick="doWithdraw()">Withdraw</button>
+        </div>
+    </div>
+</div>
+
+<!-- DEPOSIT MODAL -->
+<div id="depositModal" class="modal">
+    <div class="modal-box">
+        <div class="modal-title">Deposit Funds</div>
+        <div class="form-group"><label>Amount (Rs.)</label><input type="number" id="depositAmount" min="1" step="0.01" placeholder="Enter amount"></div>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeModal('deposit')">Cancel</button>
+            <button class="btn-submit" onclick="doDeposit()">Deposit</button>
+        </div>
+    </div>
+</div>
+
+<!-- TRANSFER MODAL -->
+<div id="transferModal" class="modal">
+    <div class="modal-box">
+        <div class="modal-title">Transfer Funds</div>
+        <div class="form-group"><label>Recipient Username</label><input type="text" id="transferUser" placeholder="Enter username"></div>
+        <div class="form-group"><label>Amount (Rs.)</label><input type="number" id="transferAmount" min="1" step="0.01" placeholder="Enter amount"></div>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeModal('transfer')">Cancel</button>
+            <button class="btn-submit" onclick="doTransfer()">Send Money</button>
+        </div>
+    </div>
+</div>
+
+<!-- QR MODAL -->
+<div id="qrModal" class="modal">
+    <div class="qr-modal-box">
+        <h3>My QR Code</h3>
+        <p>Share this to receive payments</p>
+        <div class="qr-user-info">
+            <div class="qr-name" id="qrName">-</div>
+            <div class="qr-id">User ID: <span id="qrId">-</span></div>
+        </div>
+        <canvas id="qrCanvas" width="220" height="220"></canvas>
+        <button class="btn-download" onclick="downloadQR()">Download QR</button>
+        <button class="btn-cancel" style="width:100%" onclick="closeModal('qr')">Close</button>
+    </div>
+</div>
+
+<script>
+    const API = 'http://localhost:8081';
+    let userId, username;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const p = new URLSearchParams(location.search);
+      userId = p.get('id');
+      if(!userId){ location.href='login.html'; return; }
+      document.getElementById('userId').textContent = userId;
+      loadDashboard();
+      loadRecent();
+    });
+
+    async function loadDashboard(){
+      try {
+        const res  = await fetch(`${API}/get-details/${userId}`);
+        const data = await res.json();
+        username = data.username;
+        document.getElementById('welcomeText').textContent = `Welcome, ${data.username}!`;
+        document.getElementById('balance').textContent     = data.balance.toFixed(2);
+        document.getElementById('avatarInitial').textContent = data.username.charAt(0).toUpperCase();
+        document.getElementById('qrName').textContent = data.username;
+        document.getElementById('qrId').textContent   = userId;
+      } catch { showMsg('Failed to load dashboard','error'); }
+    }
+
+    async function loadRecent(){
+      try {
+        const res  = await fetch(`${API}/passbook/${userId}`);
+        const txns = await res.json();
+        let totalIn=0, totalOut=0;
+        txns.forEach(t => {
+          const d = t.description.toLowerCase();
+          if(d.includes('deposit')||d.includes('received')) totalIn+=t.amount;
+          else totalOut+=t.amount;
+        });
+        document.getElementById('statCount').textContent = txns.length;
+        document.getElementById('statIn').textContent    = 'Rs. '+totalIn.toFixed(0);
+        document.getElementById('statOut').textContent   = 'Rs. '+totalOut.toFixed(0);
+
+        const sorted = [...txns].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+        const list   = document.getElementById('recentList');
+        if(!sorted.length){ list.innerHTML='<p class="empty-tx">No transactions yet.</p>'; return; }
+
+        list.innerHTML = sorted.map(t => {
+          const d    = t.description.toLowerCase();
+          const isIn = d.includes('deposit')||d.includes('received');
+          const type = d.includes('deposit')?'deposit':d.includes('withdrawal')?'withdrawal':'transfer';
+          const bg   = type==='deposit'?'#d4f8e8':type==='withdrawal'?'#fde0e5':'#d4e7ff';
+          const sc   = type==='deposit'?'#3ecf8e':type==='withdrawal'?'#f5576c':'#4facfe';
+          const icon = type==='deposit'
+            ? `<svg viewBox="0 0 24 24" fill="none" stroke="${sc}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>`
+            : type==='withdrawal'
+            ? `<svg viewBox="0 0 24 24" fill="none" stroke="${sc}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`
+            : `<svg viewBox="0 0 24 24" fill="none" stroke="${sc}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M15 6l6 6-6 6"/></svg>`;
+          const date = new Date(t.date).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+          return `<div class="tx-item">
+            <div class="tx-left">
+              <div class="tx-icon" style="background:${bg}">${icon}</div>
+              <div><div class="tx-desc">${t.description}</div><div class="tx-date">${date}</div></div>
+            </div>
+            <div class="tx-amount ${isIn?'credit':'debit'}">${isIn?'+':'-'}Rs. ${t.amount.toFixed(2)}</div>
+          </div>`;
+        }).join('');
+      } catch {
+        document.getElementById('recentList').innerHTML='<p class="empty-tx">Could not load transactions.</p>';
+      }
+    }
+
+    function openModal(type)  { document.getElementById(type+'Modal').classList.add('show'); }
+    function closeModal(type) { document.getElementById(type+'Modal').classList.remove('show'); }
+    window.addEventListener('click', e => {
+      ['withdraw','deposit','transfer','qr'].forEach(t => {
+        const m = document.getElementById(t+'Modal');
+        if(e.target===m) m.classList.remove('show');
+      });
+    });
+
+    async function doWithdraw(){
+      const amount = parseFloat(document.getElementById('withdrawAmount').value);
+      if(!amount||amount<=0) return showMsg('Enter a valid amount','error');
+      const r = await fetch(`${API}/withdraw`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:+userId,amount})});
+      const t = await r.text();
+      if(t.toLowerCase().includes('withdrawal')){ showMsg('Withdrawal successful','success'); closeModal('withdraw'); loadDashboard(); loadRecent(); }
+      else showMsg(t,'error');
+    }
+
+    async function doDeposit(){
+      const amount = parseFloat(document.getElementById('depositAmount').value);
+      if(!amount||amount<=0) return showMsg('Enter a valid amount','error');
+      const r = await fetch(`${API}/deposit`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:+userId,amount})});
+      const t = await r.text();
+      if(t.toLowerCase().includes('deposit')){ showMsg('Deposit successful','success'); closeModal('deposit'); loadDashboard(); loadRecent(); }
+      else showMsg(t,'error');
+    }
+
+    async function doTransfer(){
+      const toUser = document.getElementById('transferUser').value.trim();
+      const amount = parseFloat(document.getElementById('transferAmount').value);
+      if(!toUser)             return showMsg('Enter recipient username','error');
+      if(!amount||amount<=0)  return showMsg('Enter a valid amount','error');
+      const r = await fetch(`${API}/transfer`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:+userId,username:toUser,amount})});
+      const t = await r.text();
+      if(t.toLowerCase().includes('done')){ showMsg('Transfer successful','success'); closeModal('transfer'); loadDashboard(); loadRecent(); }
+      else showMsg(t,'error');
+    }
+
+    function openQrModal(){ openModal('qr'); setTimeout(drawQR,80); }
+
+    function drawQR(){
+      const canvas = document.getElementById('qrCanvas');
+      const ctx    = canvas.getContext('2d');
+      const size   = 220;
+      canvas.width=size; canvas.height=size;
+      const data = `VBS|USER:${userId}|NAME:${username||''}`;
+      ctx.fillStyle='#fff'; ctx.fillRect(0,0,size,size);
+      const cellSize=10, cols=Math.floor(size/cellSize);
+      let seed=0;
+      for(let i=0;i<data.length;i++) seed=(seed*31+data.charCodeAt(i))&0xFFFFFF;
+      function rand(){ seed=(seed*1664525+1013904223)&0xFFFFFF; return seed/0xFFFFFF; }
+      ctx.fillStyle='#8040F0';
+      for(let r=0;r<cols;r++){
+        for(let c=0;c<cols;c++){
+          const inTL=r<7&&c<7, inTR=r<7&&c>=cols-7, inBL=r>=cols-7&&c<7;
+          if(inTL){ const b=r===0||r===6||c===0||c===6, inn=r>=2&&r<=4&&c>=2&&c<=4; if(b||inn) ctx.fillRect(c*cellSize,r*cellSize,cellSize-1,cellSize-1); continue; }
+          if(inTR){ const lc=c-(cols-7),b=r===0||r===6||lc===0||lc===6,inn=r>=2&&r<=4&&lc>=2&&lc<=4; if(b||inn) ctx.fillRect(c*cellSize,r*cellSize,cellSize-1,cellSize-1); continue; }
+          if(inBL){ const lr=r-(cols-7),b=lr===0||lr===6||c===0||c===6,inn=lr>=2&&lr<=4&&c>=2&&c<=4; if(b||inn) ctx.fillRect(c*cellSize,r*cellSize,cellSize-1,cellSize-1); continue; }
+          if(rand()>0.5) ctx.fillRect(c*cellSize,r*cellSize,cellSize-1,cellSize-1);
+        }
+      }
+      ctx.fillStyle='#fff'; ctx.fillRect(size/2-26,size/2-15,52,30);
+      ctx.fillStyle='#8040F0'; ctx.font='bold 13px "DM Sans",sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('VBS', size/2, size/2);
+    }
+
+    function downloadQR(){
+      const a=document.createElement('a');
+      a.download=`VBS_QR_${userId}.png`;
+      a.href=document.getElementById('qrCanvas').toDataURL();
+      a.click();
+    }
+
+    function showMsg(msg,type){
+      const el=document.getElementById('dashMessage');
+      el.textContent=msg; el.className=`message ${type} show`;
+      setTimeout(()=>el.classList.remove('show'),3500);
+    }
+    function goPassbook(){ location.href=`passbook.html?id=${userId}`; }
+    function logout()    { location.href='home.html'; }
+</script>
+</body>
+</html>
